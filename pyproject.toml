@@ -1,0 +1,55 @@
+[build-system]
+# Defines the tools required to build the package
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "my-fastapi-app"
+version = "0.1.0"
+description = "A comprehensive example of a modern pyproject.toml file."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Mohammed Emad", email = "moemad191@gmail.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+# Core application dependencies (Replaces requirements.txt)
+dependencies = [
+    "requests>=2.31.0",
+    "pydantic>=2.0",
+    "fastapi[standard]"
+]
+
+[project.optional-dependencies]
+# Optional dependency groups (e.g., pip install ".[dev]")
+dev = [
+    "pytest>=8.0",
+    "black>=24.0",
+    "mypy>=1.0",
+]
+
+[project.urls]
+# Links visible on the PyPI package page
+Homepage = "https://github.com"
+Documentation = "https://github.com#readme"
+
+[project.scripts]
+# Creates a terminal command linking to a Python function
+my-cli-tool = "my_package.main:run_app"
+
+[tool.black]
+# Third-party configuration for the Black code formatter
+line-length = 88
+target-version = ['py310']
+
+[tool.pytest.ini_options]
+# Third-party configuration for Pytest
+minversion = "8.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
