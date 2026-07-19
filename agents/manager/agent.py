@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from langchain_core.messages import (
     HumanMessage,
@@ -11,7 +12,7 @@ from ...services.llm import llm
 
 from .prompt import MANAGER_SYSTEM_PROMPT
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ManagerAgent")
 
 
 class ManagerAgent:
@@ -24,14 +25,16 @@ class ManagerAgent:
 
     def __init__(self):
 
-        self.llm = llm.with_structured_output(
+        self.llm = llm
+
+        self.router_llm = self.llm.with_structured_output(
             ManagerDecision
         )
 
     def run(
-        self,
-        state: AgentState,
-    ) -> dict:
+    self,
+    state: AgentState,
+    ) -> dict[str, Any]:
 
         logger.info("Manager Agent")
 
@@ -45,6 +48,10 @@ class ManagerAgent:
         )
 
         if not question:
+             
+            logger.warning(
+                "Received empty question"
+            )
 
             return {
 
@@ -66,14 +73,19 @@ class ManagerAgent:
 
         try:
 
-            decision = self.llm.invoke(
+            decision = self.router_llm.invoke(
                 messages
             )
 
-        except Exception:
+            summary  = self.llm.invoke(
+                messages
+            )
+
+        except Exception as ex:
 
             logger.exception(
-                "Manager Agent Failed"
+                "Manager Agent Failed: %s",
+                ex,
             )
 
             return {
@@ -93,6 +105,7 @@ class ManagerAgent:
         return {
 
             "selected_agent": decision.agent,
+
             "context": {
                  
                 "manager": {
