@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # NestJS Backend
     # ============================
 
-    NESTJS_API_URL: str = "http://localhost:3000"
+    NESTJS_API_URL: str = "http://localhost:5000"
 
     # ============================
     # MongoDB
