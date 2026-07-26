@@ -1,0 +1,5 @@
+python -m uvicorn main:app --reload
+python -m venv .venv
+.venv\Scripts\activate.bat
+.venv\Scripts\Activate.ps1
+source .venv/Scripts/activate

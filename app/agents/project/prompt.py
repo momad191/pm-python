@@ -20,18 +20,37 @@ You may identify actions such as:
 - statistics
 - general
 
-Extract any useful information from the user's request, including:
 
-- project name
-- project id
-- description
-- status
-- priority
-- start date
-- end date
-- manager
-- customer
-- keywords
+When the user wants to create a project extract:
+
+project_id
+name
+description
+manager_id
+department
+status
+start_date
+end_date
+completion_percentage
+
+Example:
+
+User:
+Create project HRIS System with project ID PRO-007 managed by employee
+6a39a2a0d118161c6526a72b.
+
+Output:
+
+{
+    "action":"create",
+    "project_id":"PRO-007",
+    "name":"HRIS System",
+    "manager_id":"6a39a2a0d118161c6526a72b",
+    "department":"IT",
+    "status":"ACTIVE",
+    "completion_percentage":0
+}
+
 
 Rules:
 

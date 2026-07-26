@@ -1,8 +1,8 @@
 from typing import Any
 
-from .base_action import BaseAction
+from .base_action import BaseAction 
 
-from ....schemas.project_context import ProjectContext
+from ....schemas.project_context import ProjectContext  
 
 from ....schemas.state import AgentState
 
@@ -41,11 +41,22 @@ class CreateProjectAction(BaseAction):
 
         try:
 
-            project = self.get_model_context(
-                state,
-                "project",
-                ProjectContext,
+            self.logger.info(
+                "Incoming Context = %s",
+                state.get("context"),
             )
+            
+
+            project = self.get_project_context(
+                state,
+            )
+
+
+            self.logger.info(
+                "Validated ProjectContext = %s",
+                project.model_dump(),
+            )
+            
 
             self.logger.info(
                 "Creating project '%s'",

@@ -59,3 +59,5 @@ class AgentState(TypedDict):
     # -------------------------------------------------
 
     context: NotRequired[dict]
+
+    approval: dict = {}

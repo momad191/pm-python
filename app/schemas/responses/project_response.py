@@ -3,36 +3,32 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
+ 
+
 class ProjectResponse(BaseModel):
 
-    id: str = Field(alias="_id")
+    id: str | None = None
 
-    project_id: str = Field(alias="projectId")
+    projectId: str
 
     name: str
 
-    description: str
+    description: str | None = None
 
-    manager_id: str = Field(alias="managerId")
+    managerId: str
 
     department: str
 
     status: str
 
-    start_date: datetime = Field(alias="startDate")
+    startDate: str | None = None
 
-    end_date: datetime = Field(alias="endDate")
+    endDate: str | None = None
 
-    completion_percentage: int = Field(
-        alias="completionPercentage"
-    )
+    completionPercentage: int
 
-    is_deleted: bool = Field(alias="isDeleted")
+    isDeleted: bool
 
-    created_at: datetime = Field(alias="createdAt")
+    createdAt: str | None = None
 
-    updated_at: datetime = Field(alias="updatedAt")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    updatedAt: str | None = None

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 import requests
 
@@ -11,7 +11,7 @@ from ..schemas.project_context import ProjectContext
 from ..schemas.responses.project_response import ProjectResponse
 
 from .mappers.project_mapper import ProjectMapper
- 
+
 
 class ProjectService(BaseService):
     """
@@ -90,15 +90,16 @@ class ProjectService(BaseService):
 
             raise
 
+
     # -------------------------------------------------
     # Update
     # -------------------------------------------------
 
+
     def update(
         self,
-        project_id: str,
         project: ProjectContext,
-    ) -> dict[str, Any]:
+    ) -> ProjectResponse:
 
         self.validate(project)
 
@@ -106,16 +107,28 @@ class ProjectService(BaseService):
             project,
         )
 
-        return self.execute(
+
+        identifier = self.mapper.to_identifier(project)
+
+        self.logger.info(
+            "Updating project '%s'",
+            identifier,
+        )
+
+        response = self.execute(
 
             "Update Project",
 
             self.client.update_project,
 
-            project_id,
+            identifier,
 
             payload,
 
+        )
+
+        return ProjectResponse.model_validate(
+            response,
         )
 
     # -------------------------------------------------
@@ -124,17 +137,30 @@ class ProjectService(BaseService):
 
     def delete(
         self,
-        project_id: str,
-    ) -> dict[str, Any]:
+        project: ProjectContext,
+    ) -> ProjectResponse:
 
-        return self.execute(
+        identifier = self.mapper.to_identifier(
+            project,
+        )
+
+        self.logger.info(
+            "Deleting project '%s'",
+            identifier,
+        )
+
+        response = self.execute(
 
             "Delete Project",
 
             self.client.delete_project,
 
-            project_id,
+            identifier,
 
+        )
+
+        return ProjectResponse.model_validate(
+            response,
         )
 
     # -------------------------------------------------
@@ -143,37 +169,53 @@ class ProjectService(BaseService):
 
     def details(
         self,
-        project_id: str,
-    ) -> dict[str, Any]:
+        project: ProjectContext,
+    ) -> ProjectResponse:
 
-        return self.execute(
+        identifier = self.mapper.to_identifier(project)
+
+        response = self.execute(
 
             "Get Project",
 
             self.client.get_project,
 
-            project_id,
+            identifier,
 
         )
 
+        return ProjectResponse.model_validate(response)
+
+
+ 
     # -------------------------------------------------
     # List
     # -------------------------------------------------
 
     def list(
         self,
-        filters: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+        project: ProjectContext,
+    ) -> List[ProjectResponse]:
 
-        return self.execute(
+        filters = self.mapper.to_list_filters(project)
+
+        response = self.execute(
 
             "List Projects",
 
             self.client.list_projects,
 
-            filters or {},
+            filters,
 
         )
+
+        return [
+
+            ProjectResponse.model_validate(item)
+
+            for item in response
+
+        ]
 
     # -------------------------------------------------
     # Search
@@ -181,63 +223,68 @@ class ProjectService(BaseService):
 
     def search(
         self,
-        filters: dict[str, Any],
-    ) -> dict[str, Any]:
+        context: ProjectContext,
+    ) -> List[ProjectResponse]:
 
-        return self.execute(
+        payload = self.mapper.to_search_payload(context)
+
+        response = self.execute(
 
             "Search Projects",
 
             self.client.search_projects,
 
-            filters,
+            payload,
 
         )
+
+        return [
+
+            ProjectResponse.model_validate(item)
+
+            for item in response
+
+        ]
 
     # -------------------------------------------------
     # Validation
     # -------------------------------------------------
 
+ 
     def validate(
-    self,
-    project: ProjectContext,
-    ) -> None:
-        """
-        Business validation before calling
-        the Project API.
-        """
+        self,
+        project: ProjectContext,
+        ) -> None:
 
-        if not project.project_code:
+        self.logger.info(
+            "Validating ProjectContext = %s",
+            project.model_dump(),
+        )
+
+        if not project.project_id:
+
             raise ValueError(
-                "Project code is required."
+                "Project ID is required."
             )
 
         if not project.name:
+
             raise ValueError(
                 "Project name is required."
             )
 
         if not project.manager_id:
+
             raise ValueError(
                 "Manager ID is required."
             )
 
         if not project.department:
+
             raise ValueError(
                 "Department is required."
             )
-
-        if not project.start_date:
-            raise ValueError(
-                "Start date is required."
-            )
-
-        if not project.end_date:
-            raise ValueError(
-                "End date is required."
-            )
-
- 
+    
 
 
 project_service = ProjectService()

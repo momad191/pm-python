@@ -62,6 +62,11 @@ class ProjectAgent(BaseAgent):
                 messages
             )
 
+            self.logger.info(
+                "ProjectDecision = %s",
+                decision.model_dump(),
+                 )
+
         except Exception as ex:
 
             self.handle_error(ex)
@@ -77,23 +82,42 @@ class ProjectAgent(BaseAgent):
 
         self.log_finish()
 
+        context = self.update_context(
+            state,
+            "project",
+            decision.model_dump(exclude_none=True),
+        )
+
+        self.logger.info(
+            "Stored Project Context = %s",
+            context["project"],
+            )
+
+
         return {
+         "project_action": decision.action,
+         "context": context,
+            }
 
-            # Useful for graph routing
-            "project_action": decision.action,
+                
 
-            # Shared context
-            "context": self.update_context(
+        # return {
 
-                state,
+        #     # Useful for graph routing
+        #     "project_action": decision.action,
 
-                "project",
+        #     # Shared context
+        #     "context": self.update_context(
 
-                decision.model_dump(exclude_none=True),
+        #         state,
 
-            ),
+        #         "project",
 
-        }
+        #         decision.model_dump(exclude_none=True),
+
+        #     ),
+
+        # }
 
 
     @staticmethod

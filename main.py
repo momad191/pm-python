@@ -4,6 +4,14 @@ from pydantic import BaseModel
 # from .graphs.supervisor_graph import graph
 from app.graphs.supervisor_graph import graph
 
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s | %(name)s | %(message)s",
+)
+
+
 
 app = FastAPI()
 

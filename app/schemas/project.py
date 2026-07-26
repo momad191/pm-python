@@ -1,38 +1,37 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 from ..constants.project import ProjectAction
 
 
 class ProjectDecision(BaseModel):
-    """
-    Structured understanding produced by the
-    ProjectAgent.
-    """
 
     action: ProjectAction
 
-    project_id: str | None = None
+    project_id: Optional[str] = Field(
+        default=None,
+        description="Project ID such as PRO-001"
+    )
 
-    name: str | None = None
+    name: Optional[str] = None
 
-    description: str | None = None
+    description: Optional[str] = None
 
-    manager_id: str | None = None
+    manager_id: Optional[str] = None
 
-    department: str | None = None
+    department: Optional[str] = None
 
-    status: str | None = None
+    status: Optional[str] = "ACTIVE"
 
-    start_date: str | None = None
+    start_date: Optional[str] = None
 
-    end_date: str | None = None
+    end_date: Optional[str] = None
 
-    completion_percentage: int | None = None
+    completion_percentage: int = 0
+
+    is_deleted: bool = False
 
     keywords: list[str] = Field(default_factory=list)
 
-    confidence: float = Field(
-        default=1.0,
-        ge=0,
-        le=1,
-    )
+    confidence: float = 1.0
