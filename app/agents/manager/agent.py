@@ -2,7 +2,7 @@
 
 from ..base.base_agent import BaseAgent
 
-from ...schemas.manager import ManagerDecision
+from ...schemas.manager import ManagerDecision 
 
 from ...schemas.state import AgentState
 

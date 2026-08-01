@@ -5,7 +5,7 @@ from ....schemas.state import AgentState
 from ....schemas.project_context import ProjectContext
 from ....services.nestjs_client import nestjs_client
 
-  
+   
 class BaseAction(
     BaseComponent,
     ABC,
@@ -55,7 +55,7 @@ class BaseAction(
 
         return project
 
- 
+  
     def remove_context(
         self,
         state,

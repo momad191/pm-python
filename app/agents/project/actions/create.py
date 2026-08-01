@@ -1,5 +1,7 @@
 from typing import Any
 
+from datetime import datetime
+
 from .base_action import BaseAction 
 
 from ....schemas.project_context import ProjectContext  
@@ -68,28 +70,77 @@ class CreateProjectAction(BaseAction):
             # converting ProjectContext into the
             # NestJS payload.
             #
-            created_project = self.service.create(
+            created_project = self.service.create( 
                 project
             )
 
-
+ 
             self.logger.info(
                 "Project Context: %s",
                 state.get("context", {}).get("project"),
             )
 
             return self.update_state(
-                answer="Project created successfully.",
-                current_action="completed",
-                context=self.update_context(
-                    state,
-                    "project",
-                    {
-                        **project.model_dump(),
-                        "entity": created_project.model_dump(),
+
+                current_action="project.create.completed",
+
+                response={
+
+                    "domain": "project",
+
+                    "operation": "create",
+
+                    "success": True,
+
+                    "execution": {
+
+                        "service": "ProjectService.create",
+
+                        "entity": "project",
+
+                        "count": 1,
+
                     },
+
+                    "api_result": {
+
+                        "created": True,
+
+                    },
+
+                    "result_count": 1,
+
+                    "input": project.model_dump(exclude_none=True),
+
+                    "timestamp": datetime.utcnow().isoformat(),
+
+                },
+
+                entities=[
+
+                    created_project.model_dump(),
+
+                ],
+
+                context=self.update_context(
+
+                    state,
+
+                    "project",
+
+                    {
+
+                        **project.model_dump(),
+
+                        "entity": created_project.model_dump(),
+
+                    },
+
                 ),
+
             )
+
+
 
         except Exception as ex:
 

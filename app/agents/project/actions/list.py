@@ -1,5 +1,7 @@
 from typing import Any
 
+from datetime import datetime
+
 from .base_action import BaseAction
  
 from ....schemas.project_context import ProjectContext
@@ -60,30 +62,103 @@ class ListProjectAction(BaseAction):
                 "Retrieving project list."
             )
 
-            projects: list[ProjectResponse] = self.service.list(project)
+            # projects: list[ProjectResponse] = self.service.list(project)  
       
+
+            # entities = [
+            #     item.model_dump()
+            #     for item in projects
+            # ]
+
+            list_result = self.service.list(project)
+            
 
             entities = [
                 item.model_dump()
-                for item in projects
+                for item in list_result
             ]
+
+            total = len(entities)
+
 
             return self.update_state(
 
-                answer=f"Found {len(entities)} project(s).",
+                current_action="project.list.completed",
 
-                current_action="completed",
+                response={
+
+                    "domain": "project",
+
+                    "operation": "list",
+
+                    "success": True,
+
+                    "execution": {
+
+                        "service": "ProjectService.list",
+
+                        "entity": "project",
+
+                        "count": total,
+
+                    },
+
+                    "api_result": {
+
+                        "total": total,
+
+                        "page": 1,
+
+                        "limit": total,
+
+                        "total_pages": 1,
+
+                    },
+
+                    "result_count": total,
+
+                    "pagination": {
+
+                        "page": 1,
+
+                        "limit": total,
+
+                        "total_pages": 1,
+
+                    },
+
+                    "input": project.model_dump(exclude_none=True),
+
+                    "timestamp": datetime.utcnow().isoformat(),
+
+                },
 
                 entities=entities,
 
                 context=self.update_context(
+
                     state,
+
                     "project",
+
                     {
+
                         **project.model_dump(),
+
                         "entities": entities,
+
+                        "total": total,
+
+                        "page": 1,
+
+                        "limit": total,
+
+                        "totalPages": 1,
+
                     },
+
                 ),
+
             )
 
 

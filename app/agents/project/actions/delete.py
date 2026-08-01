@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from .base_action import BaseAction
@@ -112,17 +113,58 @@ class DeleteProjectExecuteAction(BaseAction):
 
             )
 
+
             return self.update_state(
 
-                answer="Project deleted successfully.",
+                current_action="project.delete.completed",
 
-                current_action="completed",
+                response={
+
+                    "domain": "project",
+
+                    "operation": "delete",
+
+                    "success": True,
+
+                    "execution": {
+
+                        "service": "ProjectService.delete",
+
+                        "entity": "project",
+
+                        "count": 1,
+
+                    },
+
+                    "api_result": {
+
+                        "deleted": True,
+
+                    },
+
+                    "result_count": 1,
+
+                    "input": project.model_dump(exclude_none=True),
+
+                    "result": entity.model_dump(),
+
+                    "timestamp": datetime.utcnow().isoformat(),
+
+                },
+
+                entities=[
+
+                    entity.model_dump(),
+
+                ],
 
                 entity=entity.model_dump(),
 
                 context=context,
 
             )
+
+
         
 
         except Exception as ex:

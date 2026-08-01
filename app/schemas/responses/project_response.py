@@ -2,32 +2,32 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-
- 
-
 class ProjectResponse(BaseModel):
 
-    id: str | None = None
+    id: str | None = Field(
+        default=None,
+        alias="_id",
+    )
 
-    projectId: str
+    projectId: str  | None = None
 
-    name: str
+    name: str  | None = None
 
     description: str | None = None
 
-    managerId: str
+    managerId: str  | None = None
 
-    department: str
+    department: str  | None = None
 
-    status: str
+    status: str  | None = None
 
     startDate: str | None = None
 
     endDate: str | None = None
 
-    completionPercentage: int
+    completionPercentage: int  | None = None
 
-    isDeleted: bool
+    isDeleted: bool  | None = None
 
     createdAt: str | None = None
 

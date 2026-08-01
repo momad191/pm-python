@@ -8,6 +8,8 @@ from typing import Type, TypeVar
 
 from pydantic import BaseModel
 
+from pydantic import ValidationError
+
 T = TypeVar(
     "T",
     bound=BaseModel,
@@ -111,7 +113,7 @@ class BaseComponent(ABC):
             state,
             key,
         )
-
+ 
         if value is None:
 
             raise ValueError(
@@ -188,13 +190,20 @@ class BaseComponent(ABC):
     # Error Handling
     # -------------------------------------------------
 
+    # -------------------------------------------------
+    # Error Handling
+    # -------------------------------------------------
+
+    from pydantic import ValidationError
+
+
     def handle_error(
         self,
         ex: Exception,
     ) -> dict[str, Any]:
         """
-        Logs an exception and returns a
-        standard failure response.
+        Logs an exception and returns an
+        actionable message for the user.
         """
 
         self.logger.exception(
@@ -203,10 +212,73 @@ class BaseComponent(ABC):
             ex,
         )
 
-        return self.failure(
-            "An unexpected error occurred."
-        )
+        # -----------------------------------------
+        # Missing required data
+        # -----------------------------------------
 
+        if isinstance(ex, ValueError):
+
+            return self.failure(
+            message=str(ex),
+            error_type=type(ex).__name__,
+            )
+
+        # -----------------------------------------
+        # Pydantic validation errors
+        # -----------------------------------------
+
+        if isinstance(ex, ValidationError):
+
+            errors = []
+
+            for err in ex.errors():
+
+                field = ".".join(
+                    str(x)
+                    for x in err["loc"]
+                )
+
+                message = err["msg"]
+
+                errors.append(
+                    f"{field}: {message}"
+                )
+
+            return self.failure(
+                "Please provide the following information:\n\n"
+                + "\n".join(
+                    f"• {e}"
+                    for e in errors
+                )
+            )
+
+        # -----------------------------------------
+        # Permission errors
+        # -----------------------------------------
+
+        if isinstance(ex, PermissionError):
+
+            return self.failure(
+                str(ex)
+            )
+
+        # -----------------------------------------
+        # Not found
+        # -----------------------------------------
+
+        if isinstance(ex, LookupError):
+
+            return self.failure(
+                str(ex)
+            )
+
+        # -----------------------------------------
+        # Fallback
+        # -----------------------------------------
+
+        return self.failure(
+            f"Unexpected error: {str(ex)}"
+        )
 
     # -------------------------------------------------
     # Update State

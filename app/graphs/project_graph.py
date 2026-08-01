@@ -10,6 +10,10 @@ from ..agents.project.agent import (
     project_agent,
 )
 
+from ..agents.response.agent import (
+    response_agent,
+)
+
 # -------------------------------------------------
 # Actions
 # -------------------------------------------------
@@ -59,6 +63,12 @@ builder = StateGraph(AgentState)
 # =================================================
 # Nodes
 # =================================================
+
+builder.add_node(
+    "response_agent",
+    response_agent.run,
+)
+
 
 builder.add_node(
     "project_agent",
@@ -139,13 +149,17 @@ builder.add_conditional_edges(
 
         "update": "update_project",
 
-        "delete": "request_delete_project",
+        # "delete": "request_delete_project",
+
+        "delete": "delete_project",
 
         "list": "list_projects",
 
         "details": "project_details",
 
         "search": "search_projects",
+
+     
 
     },
 
@@ -155,37 +169,37 @@ builder.add_conditional_edges(
 # Approval Flow
 # =================================================
 
-builder.add_edge(
-    "request_delete_project",
-    "approval",
-)
+# builder.add_edge(
+#     "request_delete_project",
+#     "approval",
+# )
 
-builder.add_conditional_edges(
+# builder.add_conditional_edges(
 
-    "approval",
+#     "approval",
 
-    approval_router,
+#     approval_router,
 
-    {
+#     {
 
-        #
-        # User still hasn't answered
-        #
-        "wait": END,
+#         #
+#         # User still hasn't answered
+#         #
+#         "wait": END,
 
-        #
-        # User rejected
-        #
-        "cancel": END,
+#         #
+#         # User rejected
+#         #
+#         "cancel": END,
 
-        #
-        # User approved
-        #
-        "delete_project": "delete_project",
+#         #
+#         # User approved
+#         #
+#         "delete_project": "delete_project",
 
-    },
+#     },
 
-)
+# )
 
 # =================================================
 # Finish
@@ -193,7 +207,7 @@ builder.add_conditional_edges(
 
 builder.add_edge(
     "create_project",
-    END,
+     END,
 )
 
 builder.add_edge(
@@ -203,21 +217,27 @@ builder.add_edge(
 
 builder.add_edge(
     "list_projects",
-    END,
+      END,
 )
 
 builder.add_edge(
     "project_details",
-    END,
+     END,
 )
 
 builder.add_edge(
     "search_projects",
-    END,
+     END,
 )
 
 builder.add_edge(
     "delete_project",
+     END,
+)
+
+
+builder.add_edge(
+    "response_agent",
     END,
 )
 

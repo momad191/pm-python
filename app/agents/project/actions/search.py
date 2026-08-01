@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from .base_action import BaseAction
@@ -9,12 +10,12 @@ from ....schemas.responses.project_response import (
     ProjectResponse,
 )
 
-from ....services.project_service import (
+from ....services.project_service import ( 
     ProjectService,
     project_service,
 )
-
-
+ 
+ 
 class SearchProjectAction(BaseAction):
     """
     Workflow responsible for searching projects.
@@ -68,17 +69,14 @@ class SearchProjectAction(BaseAction):
             #
             # Delegate to ProjectService
             #
-            projects: list[
-                ProjectResponse
-            ] = self.service.search(
-                project,
-            )
+
+            search_result = self.service.search(project)
 
             entities = [
 
                 item.model_dump()
 
-                for item in projects
+                for item in search_result.data
 
             ]
 
@@ -90,31 +88,83 @@ class SearchProjectAction(BaseAction):
 
             )
 
+            # return self.update_state(
+
+            #     answer=f"Found {search_result.total} matching project(s).",
+
+            #     current_action="completed",
+
+            #     entities=entities,
+
+            #     context=self.update_context(
+            #         state,
+            #         "project",
+            #         {
+            #             **project.model_dump(),
+            #             "entities": entities,
+            #             "total": search_result.total,
+            #             "page": search_result.page,
+            #             "limit": search_result.limit,
+            #             "totalPages": search_result.totalPages,
+            #         },
+            #     ),
+
+            # )
+
+
+
+
             return self.update_state(
 
-                answer=f"Found {len(entities)} matching project(s).",
+                current_action="project.search.completed",
 
-                current_action="completed",
+                response={
+                    "domain": "project",
+                    "operation": "search",
+                    "success": True,
+                    "execution":{
 
-                entities=entities,
+                        "service":"ProjectService.search",
 
-                context=self.update_context(
+                        "entity":"project",
 
-                    state,
+                        "count":search_result.total,
 
-                    "project",
-
-                    {
-
-                        **project.model_dump(),
-
-                        "entities": entities,
-
+                    }, 
+                    "api_result": {
+                        "total": search_result.total,
+                        "page": search_result.page,
+                        "limit": search_result.limit,
+                        "total_pages": search_result.totalPages,
                     },
-
+                    "result_count": search_result.total,
+                    "pagination": {
+                        "page": search_result.page,
+                        "limit": search_result.limit,
+                        "total_pages": search_result.totalPages,
+                    },
+                    "filters": project.model_dump(exclude_none=True),
+                    "timestamp": datetime.utcnow().isoformat(),
+                },
+                entities=entities,
+                context=self.update_context(
+                    state,
+                    "project",
+                    {
+                        **project.model_dump(),
+                        "entities": entities,
+                        "total": search_result.total,
+                        "page": search_result.page,
+                        "limit": search_result.limit,
+                        "totalPages": search_result.totalPages,
+                    },
                 ),
-
             )
+        
+
+ 
+
+
 
         except Exception as ex:
 

@@ -2,9 +2,12 @@ import httpx
 import logging
 
 from typing import Any
+from urllib.parse import urlencode
+
 
 from ..config import settings
 
+ 
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +22,10 @@ class NestJSClient:
     """
 
     def __init__(self):
+
+         
+
+        self.logger = logging.getLogger("NestJSClient")
 
         self.base_url = settings.NESTJS_API_URL.rstrip("/")
 
@@ -66,21 +73,24 @@ class NestJSClient:
         return response.json()
 
     def patch(
-        self,
-        endpoint: str,
-        data: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+            self,
+            endpoint: str,
+            payload: dict,
+        ):
 
-        logger.debug("PATCH %s", endpoint)
+            self.logger.info("PATCH %s", endpoint)
+            self.logger.info("Payload = %s", payload)
 
-        response = self.client.patch(
-            endpoint,
-            json=data,
-        )
+            response = self.client.patch(
+                endpoint,
+                json=payload,
+            )
 
-        response.raise_for_status()
+            self.logger.info("Response = %s", response.text)
 
-        return response.json()
+            response.raise_for_status()
+
+            return response.json()
 
     def delete(
         self,
@@ -150,15 +160,31 @@ class NestJSClient:
             params,
         )
 
+
     def search_projects(
         self,
-        params: dict[str, Any],
+        params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
 
-        return self.get(
-            "/project/search",
-            params,
+        params = params or {}
+
+        query = urlencode(
+            {
+                key: value
+                for key, value in params.items()
+                if value is not None
+            },
+            doseq=True,
         )
+
+        url = "/project/search" 
+
+        if query:
+            url = f"{url}?{query}"
+
+        return self.get(url)
+
+
 
     # -------------------------------------------------
 

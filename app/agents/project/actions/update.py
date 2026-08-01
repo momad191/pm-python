@@ -1,5 +1,7 @@
 from typing import Any
 
+from datetime import datetime
+
 from .base_action import BaseAction
 
 from ....schemas.project_context import ProjectContext
@@ -83,13 +85,51 @@ class UpdateProjectAction(BaseAction):
                 "Project updated successfully."
             )
 
+
+
             return self.update_state(
 
-                answer="Project updated successfully.",
+                current_action="project.update.completed",
 
-                current_action="completed",
+                response={
+
+                    "domain": "project",
+
+                    "operation": "update",
+
+                    "success": True,
+
+                    "execution": {
+
+                        "service": "ProjectService.update",
+
+                        "entity": "project",
+
+                        "count": 1,
+
+                    },
+
+                    "api_result": {
+
+                        "updated": True,
+
+                    },
+
+                    "result_count": 1,
+
+                    "input": project.model_dump(exclude_none=True),
+
+                    "result": entity.model_dump(),
+
+                    "timestamp": datetime.utcnow().isoformat(),
+
+                },
 
                 entity=entity.model_dump(),
+
+                entities=[
+                    entity.model_dump(),
+                ],
 
                 context=self.update_context(
 
@@ -108,6 +148,9 @@ class UpdateProjectAction(BaseAction):
                 ),
 
             )
+
+
+
 
         except Exception as ex:
 

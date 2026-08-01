@@ -6,7 +6,7 @@ from ...schemas.state import AgentState
 
 from .prompt import PROJECT_SYSTEM_PROMPT
  
-
+   
 from ...schemas.project import ProjectDecision
 
 
@@ -26,7 +26,7 @@ class ProjectAgent(BaseAgent):
         self.decision_llm = self.get_structured_llm(
             ProjectDecision
         )
-
+ 
     def run(
         self,
         state: AgentState,
@@ -58,9 +58,10 @@ class ProjectAgent(BaseAgent):
 
         try:
 
-            decision = self.decision_llm.invoke(
-                messages
-            )
+            decision = self.decision_llm.invoke(messages)
+
+            decision = decision.normalize()
+
 
             self.logger.info(
                 "ProjectDecision = %s",
@@ -69,11 +70,7 @@ class ProjectAgent(BaseAgent):
 
         except Exception as ex:
 
-            self.handle_error(ex)
-
-            return {
-                "answer": "Unable to process your project request."
-            }
+            return self.handle_error(ex)
 
         self.logger.info(
             "Project Decision: %s",
@@ -82,10 +79,49 @@ class ProjectAgent(BaseAgent):
 
         self.log_finish()
 
+
+
+        project_data = decision.model_dump(exclude_none=True)
+
+        if decision.search:
+
+            search = {}
+
+            if decision.search.text:
+                search["search_text"] = decision.search.text
+
+            if decision.search.project_id:
+                search["project_id"] = decision.search.project_id
+
+            if decision.search.manager_id:
+                search["manager_id"] = decision.search.manager_id
+
+            if decision.search.department:
+                search["department"] = decision.search.department
+
+            if decision.search.status:
+                search["status"] = decision.search.status
+
+            if decision.search.date:
+
+                search["date_field"] = decision.search.date.field
+                search["month"] = decision.search.date.month
+                search["year"] = decision.search.date.year
+                search["start_date"] = decision.search.date.from_date
+                search["end_date"] = decision.search.date.to_date
+
+            project_data["search"] = {
+                k: v
+                for k, v in search.items()
+                if v is not None
+            }
+
+
+
         context = self.update_context(
             state,
             "project",
-            decision.model_dump(exclude_none=True),
+            project_data
         )
 
         self.logger.info(
@@ -99,7 +135,7 @@ class ProjectAgent(BaseAgent):
          "context": context,
             }
 
-                
+                 
 
         # return {
 

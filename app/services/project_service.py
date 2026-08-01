@@ -7,12 +7,16 @@ from ..core.base_service import BaseService
 from .nestjs_client import NestJSClient, nestjs_client
 
 from ..schemas.project_context import ProjectContext
-
+ 
 from ..schemas.responses.project_response import ProjectResponse
 
 from .mappers.project_mapper import ProjectMapper
 
+from ..schemas.responses.project_search_response import (
+    ProjectSearchResponse,
+)
 
+ 
 class ProjectService(BaseService):
     """
     Domain service responsible for Project
@@ -101,7 +105,7 @@ class ProjectService(BaseService):
         project: ProjectContext,
     ) -> ProjectResponse:
 
-        self.validate(project)
+        self.validateUpdate(project)
 
         payload = self.mapper.to_update_payload(
             project,
@@ -191,14 +195,14 @@ class ProjectService(BaseService):
     # -------------------------------------------------
     # List
     # -------------------------------------------------
-
+   
     def list(
         self,
         project: ProjectContext,
     ) -> List[ProjectResponse]:
 
         filters = self.mapper.to_list_filters(project)
-
+ 
         response = self.execute(
 
             "List Projects",
@@ -224,27 +228,67 @@ class ProjectService(BaseService):
     def search(
         self,
         context: ProjectContext,
-    ) -> List[ProjectResponse]:
+    ) -> ProjectSearchResponse:
 
-        payload = self.mapper.to_search_payload(context)
+        payload = self.mapper.to_search_payload(context) or {}      
 
-        response = self.execute(
-
-            "Search Projects",
-
-            self.client.search_projects,
-
+        # Remove empty values
+        payload = {
+            key: value
+            for key, value in payload.items()
+            if value is not None
+            and value != ""
+            and value != []
+        }
+ 
+        self.logger.info(
+            "Search Payload = %s",
             payload,
-
         )
 
-        return [
+        response = self.execute(
+            "Search Projects",
+            self.client.search_projects, 
+            payload,
+        )
 
-            ProjectResponse.model_validate(item)
+        return ProjectSearchResponse.model_validate(response)
 
-            for item in response
 
-        ]
+
+
+    # -------------------------------------------------
+    # Search
+    # -------------------------------------------------
+
+    def filterDate(
+        self,
+        context: ProjectContext,
+    ) -> ProjectSearchResponse:
+
+        payload = self.mapper.to_filter_date_payload(context) or {}     
+
+        # Remove empty values
+        payload = {
+            key: value
+            for key, value in payload.items()
+            if value is not None
+            and value != ""
+            and value != []
+        }
+ 
+        self.logger.info(
+            "Search Payload = %s",
+            payload,
+        )
+
+        response = self.execute(
+            "Search Projects",
+            self.client.search_projects, 
+            payload,
+        )
+
+        return ProjectSearchResponse.model_validate(response)
 
     # -------------------------------------------------
     # Validation
@@ -258,14 +302,14 @@ class ProjectService(BaseService):
 
         self.logger.info(
             "Validating ProjectContext = %s",
-            project.model_dump(),
+            project.model_dump(by_alias=True),
         )
 
-        if not project.project_id:
+        # if not project.project_id:
 
-            raise ValueError(
-                "Project ID is required."
-            )
+        #     raise ValueError(
+        #         "Project ID is required."
+        #     )
 
         if not project.name:
 
@@ -284,7 +328,32 @@ class ProjectService(BaseService):
             raise ValueError(
                 "Department is required."
             )
-    
+
+
+        if not project.status:
+
+            raise ValueError(
+                "Status is required."
+            )
+
+
+
+
+    def validateUpdate(
+        self,
+        project: ProjectContext,
+        ) -> None:
+
+        self.logger.info(
+            "Validating ProjectContext = %s",
+            project.model_dump(by_alias=True),
+        )
+
+        if not project.project_id:
+
+            raise ValueError(
+                "Project ID is required."
+            )
 
 
 project_service = ProjectService()

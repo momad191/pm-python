@@ -1,3 +1,4 @@
+import datetime
 from typing import Any
 
 from .base_action import BaseAction
@@ -13,7 +14,7 @@ from ....services.project_service import (
 
 from ....core.approval.approval_manager import (
     ApprovalManager,
-    approval_manager,
+    # approval_manager,
 )
  
 
@@ -36,13 +37,13 @@ class DeleteProjectRequestAction(BaseAction):
     def __init__(
         self,
         service: ProjectService = project_service,
-        approvals: ApprovalManager = approval_manager,
+        # approvals: ApprovalManager = approval_manager,
     ):
 
         super().__init__("DeleteProjectRequestAction")
 
         self.service = service
-        self.approvals = approvals
+        # self.approvals = approvals
 
     def execute(
         self,
@@ -79,9 +80,9 @@ class DeleteProjectRequestAction(BaseAction):
             # )
 
 
-            approval = self.approvals.request_delete_project(
-                project
-            )
+            # approval = self.approvals.request_delete_project(
+            #     project
+            # )
            
  
             self.logger.info(
@@ -96,29 +97,70 @@ class DeleteProjectRequestAction(BaseAction):
                 project.model_dump(),
             )
 
-            updated_context = self.update_context(
-                {
-                    **state,
-                    "context": updated_context,
-                },
-                "approval",
-                approval.model_dump(),
-            )
+            # updated_context = self.update_context(
+            #     {
+            #         **state,
+            #         "context": updated_context,
+            #     },
+            #     "approval",
+            #     approval.model_dump(),
+            # )
+
 
 
             return self.update_state(
 
-                answer=approval.message,
+                current_action="project.delete.pending_approval",
 
-                current_action="waiting_for_approval",
+                # approval_required=True,
 
-                approval_required=True,
+                # approval=approval.model_dump(),
 
-                approval=approval.model_dump(),
+                response={
+
+                    "domain": "project",
+
+                    "operation": "delete_request",
+
+                    "success": True,
+
+                    "execution": {
+
+                        "service": "ApprovalManager.request_delete_project",
+
+                        "entity": "project",
+
+                        "count": 1,
+
+                    },
+
+                    "api_result": {
+
+                        "approval_created": True,
+
+                        "approval_required": True,
+
+                        "workflow_status": "waiting_for_approval",
+
+                    },
+
+                    "result_count": 1,
+
+                    "input": project.model_dump(exclude_none=True),
+
+                    # "result": approval.model_dump(),
+
+                    # "approval": approval.model_dump(),
+
+                    "timestamp": datetime.utcnow().isoformat(),
+
+                },
 
                 context=updated_context,
 
             )
+
+
  
         except Exception as ex:
 
