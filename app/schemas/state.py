@@ -26,6 +26,8 @@ class AgentState(TypedDict):
 
     question: str
 
+    openai_api_key: str
+
     answer: NotRequired[str]
 
     # -------------------------------------------------

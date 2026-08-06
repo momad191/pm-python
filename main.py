@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 # from .graphs.supervisor_graph import graph
-from app.graphs.supervisor_graph import graph
+from app.graphs.supervisor_graph import graph 
 
 import logging
 
@@ -32,9 +32,11 @@ app.add_middleware(
 )
 
 
+ 
 class Question(BaseModel):
-    # thread_id: str
     question: str
+    openai_api_key: str
+    thread_id: str | None = None
 
 
 @app.get("/")
@@ -92,28 +94,25 @@ def home():
 
 
 
-
+ 
 @app.post("/chat")
 def chat(request: Question):
 
     config = {
         "configurable": {
-            "thread_id": "6a39a2a0d118161c6526a72b",
-            # "thread_id": request.thread_id,
+            "thread_id": request.thread_id or "default-thread",
         }
     }
-
-
-    snapshot = graph.get_state(config)
-
-    print(snapshot.values)
 
     state = {
         "question": request.question,
     }
 
+    if request.openai_api_key:
+        state["openai_api_key"] = request.openai_api_key
+
     result = graph.invoke(
-        state, 
+        state,
         config=config,
     )
 

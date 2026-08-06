@@ -10,6 +10,7 @@ class AgentState(TypedDict):
     # PART 4 Create Memory
     messages: Annotated[list[BaseMessage], add_messages]
     question: str
+    openai_api_key: str
     intent: str
     prompt: str
     answer: str 

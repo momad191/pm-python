@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     # OpenAI
     # ============================
 
-    OPENAI_API_KEY: str
+    # OPENAI_API_KEY: str
     OPENAI_MODEL: str = "gpt-4.1"
     OPENAI_TEMPERATURE: float = 0
 

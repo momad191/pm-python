@@ -8,7 +8,7 @@ from ...schemas.state import AgentState
 
 from .prompt import MANAGER_SYSTEM_PROMPT
 
-
+ 
 class ManagerAgent(BaseAgent):
     """
     Supervisor Agent.
@@ -21,11 +21,8 @@ class ManagerAgent(BaseAgent):
     def __init__(self):
 
         super().__init__("ManagerAgent")
-        self.router_llm = self.get_structured_llm(
-            ManagerDecision
-        )
 
-
+  
 
 
     def run(
@@ -59,11 +56,17 @@ class ManagerAgent(BaseAgent):
             question,
         )
 
+        router_llm = self.get_structured_llm(
+            state,
+                ManagerDecision,
+            )
+        
+
         try:
 
-            decision = self.router_llm.invoke(
-                messages
-            )
+            decision = router_llm.invoke(messages)
+
+ 
 
         except Exception as ex:
 

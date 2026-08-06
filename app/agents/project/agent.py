@@ -23,10 +23,7 @@ class ProjectAgent(BaseAgent):
 
         super().__init__("ProjectAgent")
 
-        self.decision_llm = self.get_structured_llm(
-            ProjectDecision
-        )
- 
+
     def run(
         self,
         state: AgentState,
@@ -56,9 +53,14 @@ class ProjectAgent(BaseAgent):
             question,
         )
 
+        decision_llm = self.get_structured_llm(
+            state,
+            ProjectDecision,
+        )
+
         try:
 
-            decision = self.decision_llm.invoke(messages)
+            decision = decision_llm.invoke(messages)
 
             decision = decision.normalize()
 

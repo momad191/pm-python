@@ -44,7 +44,7 @@ class ResponseAgent(BaseAgent):
 
         try:
 
-            response = self.invoke(messages)
+            response = self.invoke(state,messages)
 
         except Exception as ex:
 
